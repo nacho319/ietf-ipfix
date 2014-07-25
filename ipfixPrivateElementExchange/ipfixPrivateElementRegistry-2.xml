@@ -1,0 +1,227 @@
+<?xml version="1.1" encoding="utf-8" ?>
+<IPFIX_Private_Element_Registry>
+
+	<Enterprise_Name>CERT-Software Engineering Institute-Carnegie Mellon University</Enterprise_Name>
+	<Enterprise_Copyright>(C) 2012 Carnegie Mellon University</Enterprise_Copyright>
+	<Enterprise_Contact>netsa-help@cert.org</Enterprise_Contact>
+	<Enterprise_PrivateEnterpriseNumber>6871</Enterprise_PrivateEnterpriseNumber>
+	<Enterprise_Directory>http://tools.netsa.cert.org/elementRegistry/</Enterprise_Directory>
+	
+	<Registry>
+		<Registry_ID>rat.ipfix.netsa.cert.org</Registry_ID>
+		<Registry_Name>CERT RAT Registry</Registry_Name>
+		<Registry_SecurityType>Remote Administration</Registry_SecurityType>
+		<Registry_PolicyType>Remote Administration</Registry_PolicyType>
+		<Registry_URL>http://tools.netsa.cert.org/elementRegistry/rat.xml</Registry_URL>
+
+		<Element>
+			<Description>Virtual Network Computer (VNC)</Description>
+			<Element_MimePath></Element_MimePath>
+			<Element_Number>5900</Element_Number>
+			<Element_DataType>unsigned16</Element_DataType> <!-- RFC 5610 -->
+			<Element_TypeSemantics>identifier</Element_TypeSemantics>
+			<Element_Units>none</Element_Units>
+		</Element>
+
+		<Element>
+			<Description>Poison Ivy</Description>
+			<Element_MimePath></Element_MimePath>
+			<Element_Number>65534</Element_Number>
+			<Element_DataType>unsigned16</Element_DataType> <!-- RFC 5610 -->
+			<Element_TypeSemantics>identifier</Element_TypeSemantics>
+			<Element_Units>none</Element_Units>
+		</Element>
+
+	</Registry>
+
+	<Registry>
+		<Registry_ID>p2p.ipfix.netsa.cert.org</Registry_ID>
+		<Registry_Name>CERT P2P Registry</Registry_Name>
+		<Registry_SecurityType>Peer-2-Peer</Registry_SecurityType>
+		<Registry_PolicyType>Peer-2-Peer</Registry_PolicyType>
+		<Registry_URL>http://tools.netsa.cert.org/elementRegistry/p2p.xml</Registry_URL>
+
+		<Element>
+			<Description>Gnutella</Description>
+			<Element_MimePath></Element_MimePath>
+			<Element_Number>6346</Element_Number>
+			<Element_DataType>unsigned16</Element_DataType> <!-- RFC 5610 -->
+			<Element_TypeSemantics>identifier</Element_TypeSemantics>
+			<Element_Units>none</Element_Units>
+		</Element>
+	</Registry>
+
+	<Registry>
+		<Registry_ID>im.ipfix.netsa.cert.org</Registry_ID>
+		<Registry_Name>CERT IM Registry</Registry_Name>
+		<Registry_SecurityType>Instant Messaging</Registry_SecurityType>
+		<Registry_PolicyType>Instant Messaging</Registry_PolicyType>
+		<Registry_URL>http://tools.netsa.cert.org/elementRegistry/im.xml</Registry_URL>
+
+		<Element>
+			<Description>Jabber XMPP</Description>
+			<Element_MimePath></Element_MimePath>
+			<Element_Number>5222</Element_Number>
+			<Element_DataType>unsigned16</Element_DataType> <!-- RFC 5610 -->
+			<Element_TypeSemantics>identifier</Element_TypeSemantics>
+			<Element_Units>none</Element_Units>
+		</Element>
+
+		<Element>
+			<Description>AOL Instant Messenger</Description>
+			<Element_MimePath></Element_MimePath>
+			<Element_Number>5190</Element_Number>
+			<Element_DataType>unsigned16</Element_DataType> <!-- RFC 5610 -->
+			<Element_TypeSemantics>identifier</Element_TypeSemantics>
+			<Element_Units>none</Element_Units>
+		</Element>
+
+		<Element>
+			<Description>Internet Relay Chat</Description>
+			<Element_MimePath></Element_MimePath>
+			<Element_Number>194</Element_Number>
+			<Element_DataType>unsigned16</Element_DataType> <!-- RFC 5610 -->
+			<Element_TypeSemantics>identifier</Element_TypeSemantics>
+			<Element_Units>none</Element_Units>
+		</Element>
+
+		<Element>
+			<Description>Yahoo Messenger</Description>
+			<Element_MimePath></Element_MimePath>
+			<Element_Number>5050</Element_Number>
+			<Element_DataType>unsigned16</Element_DataType> <!-- RFC 5610 -->
+			<Element_TypeSemantics>identifier</Element_TypeSemantics>
+			<Element_Units>none</Element_Units>
+		</Element>
+
+
+	</Registry>
+
+
+	<Registry>
+		<Registry_ID>web.ipfix.netsa.cert.org</Registry_ID>
+		<Registry_Name>CERT Web Registry</Registry_Name>
+		<Registry_SecurityType>Surfing</Registry_SecurityType>
+		<Registry_PolicyType>Web Browsing</Registry_PolicyType>
+		<Registry_URL>http://tools.netsa.cert.org/elementRegistry/web.xml</Registry_URL>
+
+		<Element>
+			<Description></Description>
+			<Element_MimePath>application/html</Element_MimePath>
+			<Element_Number>80</Element_Number>
+			<Element_DataType>unsigned16</Element_DataType> <!-- RFC 5610 -->
+			<Element_TypeSemantics>identifier</Element_TypeSemantics>
+			<Element_Units>none</Element_Units>
+		</Element>
+
+		<Registry>
+			<Registry_ID>fields.web.ipfix.netsa.cert.org</Registry_ID>
+			<Registry_Name>CERT Web Fields Registry</Registry_Name>
+			<Registry_SecurityType></Registry_SecurityType>
+			<Registry_PolicyType></Registry_PolicyType>
+			<Registry_URL>http://tools.netsa.cert.org/elementRegistry/web.xml</Registry_URL>
+			<Registry_RootEID>80</Registry_RootEID>
+
+			<Element>
+				<Description>Server String</Description>
+				<Element_MimePath>application/html</Element_MimePath>
+				<Element_Number>110</Element_Number>
+				<Element_DataType>string</Element_DataType> <!-- RFC 5610 -->
+				<Element_TypeSemantics>identifier</Element_TypeSemantics>
+				<Element_Units>none</Element_Units>
+			</Element>
+
+			<Element>
+				<Description>User-Agent</Description>
+				<Element_MimePath>application/html</Element_MimePath>
+				<Element_Number>111</Element_Number>
+				<Element_DataType>string</Element_DataType> <!-- RFC 5610 -->
+				<Element_TypeSemantics>identifier</Element_TypeSemantics>
+				<Element_Units>none</Element_Units>
+			</Element>
+
+			<Element>
+				<Description>Get URL</Description>
+				<Element_MimePath>application/html</Element_MimePath>
+				<Element_Number>112</Element_Number>
+				<Element_DataType>string</Element_DataType> <!-- RFC 5610 -->
+				<Element_TypeSemantics>identifier</Element_TypeSemantics>
+				<Element_Units>none</Element_Units>
+			</Element>
+
+			<Element>
+				<Description>Connection Status</Description>
+				<Element_MimePath></Element_MimePath>
+				<Element_Number>113</Element_Number>
+				<Element_DataType>unsigned16</Element_DataType> <!-- RFC 5610 -->
+				<Element_TypeSemantics>identifier</Element_TypeSemantics>
+				<Element_Units>none</Element_Units>
+			</Element>
+
+			<Element>
+				<Description>Protocol Version</Description>
+				<Element_MimePath>application/html</Element_MimePath>
+				<Element_Number>114</Element_Number>
+				<Element_DataType>string</Element_DataType> <!-- RFC 5610 -->
+				<Element_TypeSemantics>identifier</Element_TypeSemantics>
+				<Element_Units>none</Element_Units>
+			</Element>
+
+			<Element>
+				<Description>Referer URL</Description>
+				<Element_MimePath>application/html</Element_MimePath>
+				<Element_Number>115</Element_Number>
+				<Element_DataType>string</Element_DataType> <!-- RFC 5610 -->
+				<Element_TypeSemantics>identifier</Element_TypeSemantics>
+				<Element_Units>none</Element_Units>
+			</Element>
+
+			<Element>
+				<Description>Location</Description>
+				<Element_MimePath>application/html</Element_MimePath>
+				<Element_Number>116</Element_Number>
+				<Element_DataType>string</Element_DataType> <!-- RFC 5610 -->
+				<Element_TypeSemantics>identifier</Element_TypeSemantics>
+				<Element_Units>none</Element_Units>
+			</Element>
+
+			<Element>
+				<Description>Host</Description>
+				<Element_MimePath>application/html</Element_MimePath>
+				<Element_Number>117</Element_Number>
+				<Element_DataType>string</Element_DataType> <!-- RFC 5610 -->
+				<Element_TypeSemantics>identifier</Element_TypeSemantics>
+				<Element_Units>none</Element_Units>
+			</Element>
+
+			<Element>
+				<Description>Content Length</Description>
+				<Element_MimePath>application/html</Element_MimePath>
+				<Element_Number>118</Element_Number>
+				<Element_DataType>string</Element_DataType> <!-- RFC 5610 -->
+				<Element_TypeSemantics>identifier</Element_TypeSemantics>
+				<Element_Units>none</Element_Units>
+			</Element>
+
+			<Element>
+				<Description>Result Code</Description>
+				<Element_MimePath>application/html</Element_MimePath>
+				<Element_Number>123</Element_Number>
+				<Element_DataType>string</Element_DataType> <!-- RFC 5610 -->
+				<Element_TypeSemantics>identifier</Element_TypeSemantics>
+				<Element_Units>none</Element_Units>
+			</Element>
+
+			<Element>
+				<Description>Set Cookie</Description>
+				<Element_MimePath>application/html</Element_MimePath>
+				<Element_Number>221</Element_Number>
+				<Element_DataType>string</Element_DataType> <!-- RFC 5610 -->
+				<Element_TypeSemantics>identifier</Element_TypeSemantics>
+				<Element_Units>none</Element_Units>
+			</Element>
+
+
+		</Registry>
+	</Registry>
+</IPFIX_Private_Element_Registry>

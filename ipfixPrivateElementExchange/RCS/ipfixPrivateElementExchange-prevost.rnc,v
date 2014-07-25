@@ -1,0 +1,211 @@
+head	1.2;
+access;
+symbols;
+locks
+	inacio:1.2; strict;
+comment	@# @;
+
+
+1.2
+date	2013.03.14.04.35.03;	author inacio;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2012.08.01.22.50.13;	author inacio;	state Exp;
+branches;
+next	;
+
+
+desc
+@relax-ng schema for defining private Information Elements for IPFIX for interchange
+@
+
+
+1.2
+log
+@Added more structured data element, revision date, deprecation.
+@
+text
+@namespace r = "http://www.ietf.org/ipfix/ipfix-private-element-registry/1.0"
+
+# It's unclear what the right way of referencing an info element ought
+# to be.  By PEN/ID pair?  By some XML ID?  Both has problems.  Leave it
+# text for now.
+info-elem-ref = text
+
+r-data-type = element r:data-type {
+ "octetArray" |
+ "unsigned8" |
+ "unsigned16" |
+ "unsigned32" |
+ "unsigned64" |
+ "signed8" |
+ "signed16" |
+ "signed32" |
+ "signed64" |
+ "float32" |
+ "float64" |
+ "boolean" |
+ "macAddress" |
+ "string" |
+ "dateTimeSeconds" |
+ "dateTimeMilliseconds" |
+ "dateTimeMicroseconds" |
+ "dateTimeNanoseconds" |
+ "ipv4Address" |
+ "ipv6Address" |
+ "basicList" |
+ "subTemplateList" |
+ "subTemplateMultiList"
+}
+
+r-semantics = element r:semantics {
+ "default" |
+ "quantity" |
+ "totalCounter" |
+ "deltaCounter" |
+ "identifier" |
+ "flags" |
+ "list"
+}
+
+r-units = element r:units {
+ "none" |
+ "bits" |
+ "octets" |
+ "packets" |
+ "flows" |
+ "seconds" |
+ "milliseconds" |
+ "microseconds" |
+ "nanoseconds" |
+ "4-octet words" |
+ "messages" |
+ "hops" |
+ "entries"
+}
+
+#r-value-map = element r:value-map {
+#	attribute type {"integer" | "text" },
+#	{element value }
+#}
+
+r-element = element r:element {
+ element r:id { xsd:integer {minInclusive="0" maxInclusive="65535"}} &
+ element r:private-enterprise-number { xsd:integer {minInclusive="0" maxInclusive="4294967295"}}? &
+ r-data-type &
+ r-semantics? &
+ r-units? &
+ element r:range-begin { text }? &
+ element r:range-end { text }? &
+ element r:name { xsd:token } &
+ element r:description { text } &
+
+ element r:mime-path { text }?
+
+ element r:createDate { xsd:date } &
+ element r:deprecated { xsd:date }? &
+ element r:retired { xsd:date }?
+ 
+# element r:value-map {
+#	 attribute type {"integer" | "text"},
+# }
+}
+
+r-registry = element r:registry {
+ element r:id { xsd:anyURI } &
+ element r:name { text } &
+
+ # Should these two be required or optional?
+ element r:security-type { text } &
+ element r:policy-type { text } &
+
+ element r:url { xsd:anyURI } &
+ element r:root-eid { xsd:integer } &
+ (r-registry | r-element)*
+}
+
+r-enterprise-registry = element r:enterprise-registry {
+ element r:name { text } &
+ element r:copyright { text } &
+ element r:contact { text } &
+ element r:private-enterprise-number { xsd:integer } &
+ element r:directory { xsd:anyURI } &
+ element r:versionMajor { xsd:integer } &
+ element r:versionMinor { xsd:integer } &
+ element r:revisionDate { xsd:date } &
+ r-registry*
+}
+
+start = r-enterprise-registry
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d28 4
+a31 1
+ "ipv6Address"
+d40 2
+a41 1
+ "flags"
+d60 4
+a63 1
+r-
+d66 2
+a67 2
+ element r:id { xsd:integer } &
+ element r:private-enterprise-number { xsd:integer }? &
+d76 5
+a80 1
+ element r:mime-path { text }? &
+d82 3
+a84 4
+ element r:value-map {
+	 attribute type {"integer" | "text"},
+	 
+ }
+d106 3
+a112 37
+
+#------------------------------------------------------------------------
+#
+#<enterprise-registry xmlns="http://.../ipfix-private-element-registry/1.0">
+#
+# <name>CERT-Software Engineering Institute-Carnegie Mellon University</name>
+# <copyright>(C) 2012 Carnegie Mellon University</copyright>
+# <contact>netsa-help@@cert.org</contact>
+# <private-enterprise-number>6871</private-enterprise-number>
+# <directory>http://tools.netsa.cert.org/elementRegistry/</directory>
+#
+# <registry>
+#   <id>http://netsa.cert.org/ipfix/payload</id>
+#   <name>CERT Made-Up Payload Registry</name>
+#   <security-type>Payload Data</security-type>
+#   <policy-type>Payload Data</policy-type>
+#   <url>http://tools.netsa.cert.org/element-registry/payload.xml</url>
+#
+#   <element>
+#     <id>18</id>
+#     <data-type>octetArray</data-type>
+#     <name>payload</name>
+#     <description>Full payload capture for forward direction</description>
+#     <reverse-of>6871 16402</reverse-of>
+#   </element>
+#
+#   <element>
+#     <id>16402</id>
+#     <data-type>octetArray</data-type>
+#     <name>reversePayload</name>
+#     <description>Full payload capture for reverse direction</description>
+#     <reverse-of>6871 18</reverse-of>
+#   </element>
+#
+# <registry>
+#
+#</enterprise-registry>
+@

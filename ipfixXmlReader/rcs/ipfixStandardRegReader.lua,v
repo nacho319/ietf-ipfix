@@ -1,0 +1,182 @@
+head	1.2;
+access;
+symbols;
+locks
+	inacio:1.2; strict;
+comment	@# @;
+
+
+1.2
+date	2013.05.07.11.03.42;	author inacio;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2013.05.07.10.45.49;	author inacio;	state Exp;
+branches;
+next	;
+
+
+desc
+@small Lua script to read in the ipfix.xml file and spit it out in a new format
+@
+
+
+1.2
+log
+@made some progress, need to figure out when things are really nested XML tables
+@
+text
+@require('LuaXml')
+
+
+
+
+--[[
+myXmlFind
+---------
+
+code liberally borrowed from the LuaXML package by Gerald Franz
+
+
+
+LuaXML License
+
+LuaXML is licensed under the terms of the MIT license reproduced below,
+the same as Lua itself. This means that LuaXML is free software and can be
+used for both academic and commercial purposes at absolutely no cost.
+
+Copyright (C) 2007-2010 by Gerald Franz, www.viremo.de
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+--]]
+function myXmlFind(var, tag, attributeKey, attributeValue)
+	local base = _G
+
+	-- check the input
+    if base.type(var)~="table" then 
+		return 
+	end
+    if base.type(tag)=="string" and #tag==0 then 
+		tag=nil 
+	end
+    if base.type(attributeKey)~="string" or #attributeKey==0 then 
+		attributeKey=nil 
+	end
+    if base.type(attributeValue)=="string" and #attributeValue==0 then 
+		attributeValue=nil 
+	end
+
+	--
+	-- compare the table
+	--
+    if tag~=nil then
+      if var[0]==tag and ( attributeValue == nil or var[attributeKey]==attributeValue ) then
+        base.setmetatable(var,{__index=xml, __tostring=xml.str})
+        return var,0
+      end
+    else
+      if attributeValue == nil or var[attributeKey]==attributeValue then
+        base.setmetatable(var,{__index=xml, __tostring=xml.str})
+        return var,0
+      end
+    end
+	
+    -- recursively parse subtags:
+    for k,v in base.ipairs(var) do
+      if base.type(v)=="table" then
+        --local ret = find(v, tag, attributeKey,attributeValue)
+		local ret,derIndex = myXmlFind(v, tag, attributeKey,attributeValue)
+        if ret ~= nil then 
+			return ret,derIndex 
+		end
+      end
+    end
+
+end
+
+--[[
+
+--]]
+function recurseRec(xRec, indent)
+	local stringLine = ""
+	
+	for j=1,indent do
+		stringLine = stringLine.."\t"
+	end
+	
+	stringLine = stringLine..": "..tostring(xRec)
+	
+	print(stringLine)
+	
+	if _G.type(xRec[0])=="table" then
+		recurseRec(xRec[0], indent+1)
+	end
+end
+
+-- read and process the standard IANA IE registry and be able to host 
+-- that registry in registry distribution format
+local ianaRegFile = xml.load("ipfix.xml")
+
+
+local firstRecord,startIndex = myXmlFind(ianaRegFile, "registry", "id", "ipfix-information-elements")
+--print ("key index: ", startIndex, " registry record table: ", firstRecord)
+
+
+for index=6,#firstRecord do
+	for recI=0,#firstRecord[index] do
+		local workRec = firstRecord[index][recI]
+		print("\t",recI,": ",workRec)
+		if _G.type(workRec)=="table" then
+			print("type of [index][recI]: ", _G.type(workRec))
+			recurseRec(workRec, 2)
+		end
+	end
+	print("\n-=-=-=-\n")
+end
+
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d92 1
+a92 1
+	for j=1,index do
+d96 1
+a96 1
+	stringLine = stringLine..": "..xRec[0]
+d100 3
+a102 4
+	return
+--	if (#xRec ~= 1) then
+--		recurseRec(xRec[0], indent+1)
+--	end
+a113 1
+print("\n\n\n\n\n")
+d116 5
+a120 3
+		print("\t",recI,": ",firstRecord[index][recI])
+		if (#firstRecord[index][recI] ~= 1) then
+			recurseRec(firstRecord[index][recI], 2)
+@

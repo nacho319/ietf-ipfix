@@ -1,0 +1,169 @@
+namespace r = "http://www.ietf.org/ipfix/ipfix-private-element-registry/1.0"
+
+
+# It's unclear what the right way of referencing an info element ought
+# to be.  By PEN/ID pair?  By some XML ID?  Both has problems.  Leave it
+# text for now.
+#
+# some alternative (in RelaxNG) definition of info-elem-ref
+#
+#  -- r-ieID = element r:id { xsd:integer {minInclusive="0" maxInclusive="65535"}}
+#  --  info-elem-ref = element r:info-elem-ref {
+#  --     element r:id { xsd:integer {minInclusive="0" maxInclusive="65535"}} &
+#  --     element r:private-enterprise-number { xsd:integer {minInclusive="0" maxInclusive="4294967295"}}
+#  -- }
+#
+info-elem-ref = text
+
+r-data-type = element r:data-type {
+ "octetArray" |
+ "unsigned8" |
+ "unsigned16" |
+ "unsigned32" |
+ "unsigned64" |
+ "signed8" |
+ "signed16" |
+ "signed32" |
+ "signed64" |
+ "float32" |
+ "float64" |
+ "boolean" |
+ "macAddress" |
+ "string" |
+ "dateTimeSeconds" |
+ "dateTimeMilliseconds" |
+ "dateTimeMicroseconds" |
+ "dateTimeNanoseconds" |
+ "ipv4Address" |
+ "ipv6Address" |
+ "basicList" |
+ "subTemplateList" |
+ "subTemplateMultiList"
+}
+
+r-semantics = element r:semantics {
+ "default" |
+ "quantity" |
+ "totalCounter" |
+ "deltaCounter" |
+ "identifier" |
+ "flags" |
+ "list"
+}
+
+r-units = element r:units {
+ "none" |
+ "bits" |
+ "octets" |
+ "packets" |
+ "flows" |
+ "seconds" |
+ "milliseconds" |
+ "microseconds" |
+ "nanoseconds" |
+ "4-octet words" |
+ "messages" |
+ "hops" |
+ "entries"
+}
+
+
+#
+# Definition of an Information Element
+#
+#
+r-element = element r:element {
+
+ #
+ #
+ #	
+ element r:id { xsd:integer {minInclusive="0" maxInclusive="65535"}} &
+ element r:private-enterprise-number { xsd:integer {minInclusive="0" maxInclusive="4294967295"}}? &
+ element r:name { xsd:token } &
+ element r:description { text } &
+
+ #
+ # Datatype information, including structured data types
+ #
+ r-data-type &
+ r-semantics? &
+ 
+ #
+ # RFC5610 Type Information for elements
+ #
+ r-units? &
+ element r:range-begin { text }? &
+ element r:range-end { text }? &
+
+ element r:mime-path { text }? &
+
+ #
+ # Unobserved values
+ #
+ element r:derivedValue { xsd:boolean }? &
+ element r:algorithmDesc { text }? &
+
+
+ #
+ # Attributes about the role/relationship between
+ # one element instance and others
+ #
+ ( attribute r:discriminator { info-elem-ref }
+	 # text isn't the correct thing here, but what is?  integer?
+	| attribute r:selectValue { text }
+  )? &
+
+
+ #
+ # Metadata about the creation, deprecation of
+ # this information element
+ #
+ element r:createDate { xsd:date } &
+ element r:deprecated { xsd:date }? &
+ element r:retired { xsd:date }? &
+ element r:standarized { xsd:integer {minInclusive="0" maxInclusive="65535"}}?
+ 
+}
+
+#
+# Definition of a registry
+#
+# This is not the enterprise registry, which there is
+# is only one per file.  This is a smaller structure
+# which is mostly designed to group like elements
+# together - having similar security or policy types
+# for example
+#
+# It can contain elements or further sub-registries
+#
+r-registry = element r:registry {
+ element r:id { xsd:anyURI } &
+ element r:name { text } &
+
+ # Should these two be required or optional?
+ element r:security-type { text }? &
+ element r:policy-type { text }? &
+
+ element r:url { xsd:anyURI } &
+ element r:root-eid { xsd:integer } &
+ (r-registry | r-element)*
+}
+
+#
+# Definition of an enterprise registry
+#
+# It contains metadata about the registry and
+# one or more registries
+#
+r-enterprise-registry = element r:enterprise-registry {
+ element r:name { text } &
+ element r:copyright { text } &
+ element r:contact { text } &
+ element r:private-enterprise-number { xsd:integer } &
+ element r:directory { xsd:anyURI } &
+ element r:revisionNum  { xsd:integer } &
+ element r:revisionDate { xsd:date } &
+ r-registry*
+}
+
+start = r-enterprise-registry

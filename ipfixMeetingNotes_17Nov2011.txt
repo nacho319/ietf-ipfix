@@ -1,0 +1,113 @@
+IPFIX meeting notes
+===================
+
+
+WG general
+----------
+
+PSAMP MIB depends on IPFIX MIB bis (RFC 5815) with a corrected IANA registery
+
+
+Looking for a clarification of the IPR claims from AT&T on which PSAMP methods are covered by their patent.  AT&T has made a disclosure.  Nevile has asked AT&T legal for clarification.
+
+
+New charter approved.
+
+
+* REMOTE participants DEMAND Meetecho/Webex for meeting *
+
+IPFIX doctors
+-------------
+
+Dan R: need the "cut-n-paste" protection system for people.  They will cut from the wrong place without guidance.
+
+Benoit: Where can we capture the knowledge of what are the "bad" IE's; because most of it is in Nevile's head.
+
+Nevile: getting it written down in a draft is the good first step forward.
+
+Dan: step a) wiki b) appendix
+
+Paul A: Wiki => NO
+
+BHT: add appendix with good/bad examples
+
+Dan R: Agree and amplify the comment of put a strong eye to things that can be checked with automation
+
+Chris I: the good/bad examples in the appendix might need some real review
+
+Nevile: the document is strongly written, a lot of examples probably aren't needed
+
+
+Exporting Aggregated Flow Data
+------------------------------
+
+Aiming for WGLC before Paris.
+
+5101bis
+-------
+
+Nevil: This update will require a lot of review, because of the detail level of changes.
+
+Brian T: <will describe template solution>  Similar to approach used in IPFIX file.
+
+Benoit: We need DTLS support in order to not block the documents; because the charter says we will interop them.
+
+Chris I: DTLS heartbeat advanced to IESG review
+
+Brian T: If the spec is clear, and we have a good alternative in the spec (TLS/TCP) that we can interop, maybe we can advance without doing implementation interop with DTLS/UDP.
+
+Nevile: Not going to solve this here.  Now need to figure out way forward, take this to the list.  Have to have 
+
+
+5102bis
+-------
+
+IPFIX XML in 5102 is different than IANA registry.
+
+Brian: Need to update it, and remove things like the MPLS label stack.
+
+Dan R.: Should do our best to publish up-to-date information.  Publish an updated snapshot of the IE's at the time of publication.
+
+Dan R., Brian T., & Benoit: agree to just refer to IANA, also shorten 5102bis length a lot.
+
+Paul & Andrew refer to IANA already.
+
+Bring to the list if we want to fix the Schema that has bugs in 5102.  If we do that, then WG has to agree on the schema & the chairs bring that to IANA.  Should the schema be the what is in 5102bis (brian, benoit, nevile probably no), but then there is a new WG effort to create the schema.
+
+Exporting MIB in IPFIX
+----------------------
+
+Seems to be an issue with the export of OID's on indexed objects and how they get exported into IPFIX.  Question is if we're trying to solve an implementation issue in the standard - which would be bad.
+
+Benoit: Read the examples to understand the issues.
+
+Nevile: This needs a lot of work before its ready.
+
+Brian: Potentially devise a way, if/when extending the template mechanism, to support extending the template mechanism to allow other information elements namespaces to be added.  Extend the template 
+
+Nevile: Let's not boil the ocean.
+
+
+Brian: Make the template changes to allow for future IE namespace growth in a generic way.
+
+5815bis
+-------
+
+moving to WG last call.
+
+
+Comments on 6313: Structured Data
+---------------------------------
+
+Brian & Chris: add data type information to structured information; for *example*, add an options template with the "type" information, and then extend the structured data types to include another field that points to the options template "type" information.
+
+Export of Application ID
+------------------------
+
+Nevile: Will an AD sponsor it?
+Dan: Want to read the draft first; not crazy about it, since it is from a single vendor first.
+
+
+
+
+

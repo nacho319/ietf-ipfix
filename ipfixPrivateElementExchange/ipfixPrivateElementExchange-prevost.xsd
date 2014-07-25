@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.ietf.org/ipfix/ipfix-private-element-registry/1.0" xmlns:r="http://www.ietf.org/ipfix/ipfix-private-element-registry/1.0">
+  <!--
+    It's unclear what the right way of referencing an info element ought
+    to be.  By PEN/ID pair?  By some XML ID?  Both has problems.  Leave it
+    text for now.
+    
+    some alternative (in RelaxNG) definition of info-elem-ref
+    
+     -- r-ieID = element r:id { xsd:integer {minInclusive="0" maxInclusive="65535"}}
+     --  info-elem-ref = element r:info-elem-ref {
+     --     element r:id { xsd:integer {minInclusive="0" maxInclusive="65535"}} &
+     --     element r:private-enterprise-number { xsd:integer {minInclusive="0" maxInclusive="4294967295"}}
+     -- }
+    
+  -->
+  <xs:element name="data-type">
+    <xs:simpleType>
+      <xs:restriction base="xs:token">
+        <xs:enumeration value="octetArray"/>
+        <xs:enumeration value="unsigned8"/>
+        <xs:enumeration value="unsigned16"/>
+        <xs:enumeration value="unsigned32"/>
+        <xs:enumeration value="unsigned64"/>
+        <xs:enumeration value="signed8"/>
+        <xs:enumeration value="signed16"/>
+        <xs:enumeration value="signed32"/>
+        <xs:enumeration value="signed64"/>
+        <xs:enumeration value="float32"/>
+        <xs:enumeration value="float64"/>
+        <xs:enumeration value="boolean"/>
+        <xs:enumeration value="macAddress"/>
+        <xs:enumeration value="string"/>
+        <xs:enumeration value="dateTimeSeconds"/>
+        <xs:enumeration value="dateTimeMilliseconds"/>
+        <xs:enumeration value="dateTimeMicroseconds"/>
+        <xs:enumeration value="dateTimeNanoseconds"/>
+        <xs:enumeration value="ipv4Address"/>
+        <xs:enumeration value="ipv6Address"/>
+        <xs:enumeration value="basicList"/>
+        <xs:enumeration value="subTemplateList"/>
+        <xs:enumeration value="subTemplateMultiList"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:element>
+  <xs:element name="semantics">
+    <xs:simpleType>
+      <xs:restriction base="xs:token">
+        <xs:enumeration value="default"/>
+        <xs:enumeration value="quantity"/>
+        <xs:enumeration value="totalCounter"/>
+        <xs:enumeration value="deltaCounter"/>
+        <xs:enumeration value="identifier"/>
+        <xs:enumeration value="flags"/>
+        <xs:enumeration value="list"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:element>
+  <xs:element name="units">
+    <xs:simpleType>
+      <xs:restriction base="xs:token">
+        <xs:enumeration value="none"/>
+        <xs:enumeration value="bits"/>
+        <xs:enumeration value="octets"/>
+        <xs:enumeration value="packets"/>
+        <xs:enumeration value="flows"/>
+        <xs:enumeration value="seconds"/>
+        <xs:enumeration value="milliseconds"/>
+        <xs:enumeration value="microseconds"/>
+        <xs:enumeration value="nanoseconds"/>
+        <xs:enumeration value="4-octet words"/>
+        <xs:enumeration value="messages"/>
+        <xs:enumeration value="hops"/>
+        <xs:enumeration value="entries"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:element>
+  <!--
+    
+    Definition of an Information Element
+    
+    
+  -->
+  <xs:element name="element">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="id">
+          <xs:simpleType>
+            <xs:restriction base="xs:integer">
+              <xs:minInclusive value="0"/>
+              <xs:maxInclusive value="65535"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:element>
+        <xs:element name="private-enterprise-number">
+          <xs:simpleType>
+            <xs:restriction base="xs:integer">
+              <xs:minInclusive value="0"/>
+              <xs:maxInclusive value="4294967295"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:element>
+        <xs:element name="name" type="xs:token"/>
+        <xs:element ref="r:description"/>
+        <xs:element ref="r:data-type"/>
+        <xs:element ref="r:semantics"/>
+        <xs:element ref="r:units"/>
+        <xs:element ref="r:range-begin"/>
+        <xs:element ref="r:range-end"/>
+        <xs:element ref="r:mime-path"/>
+        <xs:element ref="r:derivedValue"/>
+        <xs:element ref="r:algorithmDesc"/>
+        <xs:element ref="r:createDate"/>
+        <xs:element ref="r:deprecated"/>
+        <xs:element ref="r:retired"/>
+        <xs:element ref="r:standarized"/>
+      </xs:choice>
+      <xs:attribute name="discriminator" form="qualified"/>
+      <xs:attribute name="selectValue" form="qualified"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="description" type="xs:string"/>
+  <xs:element name="range-begin" type="xs:string"/>
+  <xs:element name="range-end" type="xs:string"/>
+  <xs:element name="mime-path" type="xs:string"/>
+  <xs:element name="derivedValue" type="xs:boolean"/>
+  <xs:element name="algorithmDesc" type="xs:string"/>
+  <xs:element name="createDate" type="xs:date"/>
+  <xs:element name="deprecated" type="xs:date"/>
+  <xs:element name="retired" type="xs:date"/>
+  <xs:element name="standarized">
+    <xs:simpleType>
+      <xs:restriction base="xs:integer">
+        <xs:minInclusive value="0"/>
+        <xs:maxInclusive value="65535"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:element>
+  <!--
+    
+    Definition of a registry
+    
+    This is not the enterprise registry, which there is
+    is only one per file.  This is a smaller structure
+    which is mostly designed to group like elements
+    together - having similar security or policy types
+    for example
+    
+    It can contain elements or further sub-registries
+    
+  -->
+  <xs:element name="registry">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="id" type="xs:anyURI"/>
+        <xs:element name="name" type="xs:string"/>
+        <xs:element ref="r:security-type"/>
+        <xs:element ref="r:policy-type"/>
+        <xs:element ref="r:url"/>
+        <xs:element ref="r:root-eid"/>
+        <xs:choice>
+          <xs:element ref="r:registry"/>
+          <xs:element ref="r:element"/>
+        </xs:choice>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="security-type" type="xs:string"/>
+  <xs:element name="policy-type" type="xs:string"/>
+  <xs:element name="url" type="xs:anyURI"/>
+  <xs:element name="root-eid" type="xs:integer"/>
+  <!--
+    
+    Definition of an enterprise registry
+    
+    It contains metadata about the registry and
+    one or more registries
+    
+  -->
+  <xs:element name="enterprise-registry">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="name" type="xs:string"/>
+        <xs:element ref="r:copyright"/>
+        <xs:element ref="r:contact"/>
+        <xs:element name="private-enterprise-number" type="xs:integer"/>
+        <xs:element ref="r:directory"/>
+        <xs:element ref="r:revisionNum"/>
+        <xs:element ref="r:revisionDate"/>
+        <xs:element ref="r:registry"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="copyright" type="xs:string"/>
+  <xs:element name="contact" type="xs:string"/>
+  <xs:element name="directory" type="xs:anyURI"/>
+  <xs:element name="revisionNum" type="xs:integer"/>
+  <xs:element name="revisionDate" type="xs:date"/>
+</xs:schema>

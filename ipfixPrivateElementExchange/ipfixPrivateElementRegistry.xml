@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<IPFIX_Private_Element_Registry>
+<Registry_Name>CERT P2P Registry</Registry_Name>
+<Registry_PrivateEnterpriseNumber>6871</Registry_PrivateEnterpriseNumber>
+<Registry_Copyright>(C) 2012 Carnegie Mellon University</Registry_Copyright>
+<Registry_Contact>netsa-help@cert.org</Registry_Contact>
+<Registry_SecurityType>Peer-2-Peer</Registry_SecurityType>
+<Registry_PolicyType>Peer-2-Peer</Registry_PolicyType>
+<Registry_URL>http://tools.netsa.cert.org/elementRegistry/p2p.xml</Registry_URL>
+
+<Element>
+	<Description>Gnutella</Description>
+	<Element_MimePath></Element_MimePath>
+	<Element_Number>6346</Element_Number>
+	<Element_DataType>unsigned16</Element_DataType> <!-- RFC 5610 -->
+	<Element_TypeSemantics>identifier</Element_TypeSemantics>
+	<Element_Units>none</Element_Units>
+</Element>
+
+<!-- 
+<Element>
+	<Description></Description>
+	<Element_MimePath></Element_MimePath>
+	<Element_Number></Element_Number>
+	<Element_Type></Element_Type>
+	<Element_TypeSemantics></Element_TypeSemantics>
+	<Element_Units></Element_Units>
+</Element>
+-->	
+
+</IPFIX_Private_Element_Registry>

@@ -1,0 +1,952 @@
+
+
+
+
+IPFIX                                                          C. Inacio
+Internet-Draft                                                       CMU
+Intended status: Standards Track                        November 8, 2013
+Expires: May 12, 2014
+
+
+       Private Enterprise Information Elements Registry Exchange
+                    draft-inacio-ipfix-penie-01.txt
+
+Abstract
+
+   This extension to the IPFIX protocol is intended to provide a
+   mechanism for IPFIX exporters which export private information
+   elements to also transmit information to the collectors.  The
+   mechanism is designed to be able to send a URI with information about
+   the private information elements via an options template.  Using this
+   mechanism an exporter can inform a collector about private enterprise
+   information elements, the transition of private enterprise elements
+   to IANA well known information elements, as well as usage information
+   of various exporter structures for collector information.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at http://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on May 12, 2014.
+
+Copyright Notice
+
+   Copyright (c) 2013 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (http://trustee.ietf.org/license-info) in effect on the date of
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with respect
+
+
+
+Inacio                    Expires May 12, 2014                  [Page 1]
+
+Internet-Draft                 IPFIX-PENIE                 November 2013
+
+
+   to this document.  Code Components extracted from this document must
+   include Simplified BSD License text as described in Section 4.e of
+   the Trust Legal Provisions and are provided without warranty as
+   described in the Simplified BSD License.
+
+Table of Contents
+
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
+   2.  Use Cases . . . . . . . . . . . . . . . . . . . . . . . . . .   3
+     2.1.  Private Information Elements  . . . . . . . . . . . . . .   3
+     2.2.  Calculated or Unobserved Fields . . . . . . . . . . . . .   4
+     2.3.  Structured Data . . . . . . . . . . . . . . . . . . . . .   4
+     2.4.  Optional Feature Enablement / Hierarchal Feature
+           Description . . . . . . . . . . . . . . . . . . . . . . .   5
+   3.  Options Record Format . . . . . . . . . . . . . . . . . . . .   5
+   4.  Registry Design . . . . . . . . . . . . . . . . . . . . . . .   7
+     4.1.  Registry Introduction . . . . . . . . . . . . . . . . . .   8
+     4.2.  Registry Fields . . . . . . . . . . . . . . . . . . . . .   8
+     4.3.  Information Element Fields  . . . . . . . . . . . . . . .   8
+   5.  Example Usage . . . . . . . . . . . . . . . . . . . . . . . .   9
+     5.1.  Simple Description of Private Elements  . . . . . . . . .   9
+   6.  Security Considerations . . . . . . . . . . . . . . . . . . .  11
+   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  11
+   8.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  11
+   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  12
+     9.1.  Normative References  . . . . . . . . . . . . . . . . . .  12
+     9.2.  Informative References  . . . . . . . . . . . . . . . . .  12
+   Appendix A.  Registry Schema  . . . . . . . . . . . . . . . . . .  12
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  17
+
+1.  Introduction
+
+   The IPFIX protocol [RFC5101][RFC7011] defined a significant
+   information element set for a large number of relevant network
+   activities.  The IPFIX protocol was also designed with the ability to
+   extend its information model in two ways.  A standards based
+   mechanism using an IANA registry for general purpose public
+   information elements is one way.  The protocol also allows for
+   extension by enterprises using private enterprise numbers to define
+   elements of limited interest.  Beyond adding the ability to pass new
+   information elements, the IPFIX protocol is designed to allow
+   collectors the ability to skip information elements which cannot be
+   comprehended.
+
+   IPFIX was extended in [RFC5610] IPFIX Semantic Type Information to
+   allow IPFIX send type semantic information about information
+   elements.  This mechanism allows an IPFIX exporter to send type
+   semantic information along with a common name about an information
+
+
+
+Inacio                    Expires May 12, 2014                  [Page 2]
+
+Internet-Draft                 IPFIX-PENIE                 November 2013
+
+
+   element to the collector.  This allows information elements that the
+   collector would otherwise not be able to comprehend to provide much
+   more information.
+
+   The mechanism proposed here extends the Semantic Type Information in
+   two ways.  First, it allows a more complex definition of information
+   to be presented, capturing the possible relationships contained
+   within the IPFIX Structured Data extension.  The IPFIX Structured
+   Data extension, having been completed after the Semantic Type
+   Information, is not covered in the Semantic Type Information.
+   Secondly, by moving the information element metadata out from the
+   potentially resource constrained IPFIX data channel, this extension
+   allows a richer and comprehensive set of metadata to be expressed.
+
+2.  Use Cases
+
+   In order for a collector to be general purpose, the collector must be
+   capable of receiving IPFIX data streams from a large variety of
+   exporters.  In very basic flow export scenarios, the extra
+   information that can be provided using this mechanism is not needed.
+   For example, simply exporting IP address pairs, transport protocol,
+   transport protocol port pairs, and duration for example does not need
+   enhanced information for a collector to store and present that
+   information to a user.
+
+   Unfortunately, understanding network traffic is significantly more
+   complex than simple TCP or UDP network connections.  With data
+   elements covering tunneling protocols such as MPLS and GRE, the five
+   tuple previously mentioned may not even be enough to uniquely define
+   a network flow in the traffic.  The difficultly lies in capturing the
+   structure of traffic defined in the layers present on the network
+   (MPLS, IP, TCP, HTTP, HTTP fields) in such a manner that a collector
+   can:
+
+   1.  correctly reconstruct the packet structure captured by the probe
+       and
+
+   2.  quickly determine which elements are of interest and which
+       elements may be discarded.
+
+2.1.  Private Information Elements
+
+   In the most simple case, a complete explanation of private enterprise
+   elements can be provided to the collector, along with description
+   text that collector can use to enhance the data presentation to a
+   human.  The information contained within the registry relies upon
+   standard IPFIX type information [RFC5610], but can also add field
+   relationships.
+
+
+
+Inacio                    Expires May 12, 2014                  [Page 3]
+
+Internet-Draft                 IPFIX-PENIE                 November 2013
+
+
+   Additional, the registry allows for clearly telling a collector that
+   a private enterprise element has been replaced by an IANA approved
+   element.  This allows the collector to maintain historical data and
+   continue to collect new data across exporter upgrade boundaries.
+
+2.2.  Calculated or Unobserved Fields
+
+   Some fields may be present in the exported IPFIX stream which are
+   derived by the the probe or exporting process.  These fields
+   generally represent some type calculated field.  For example, the
+   mean opinion score (MOS) is often used metric for voice call quality
+   and therefore applicable to VoIP operation.  Additional information
+   provided within the registry information may include algorithm
+   definition and caveats such that a collector may present more
+   detailed information about the data to a user.
+
+2.3.  Structured Data
+
+   In order to capture the encapsulation properties of network traffic,
+   structured data may be used by an exporter.  Collector implementation
+   is significantly harder when subtemplate multilist structured data
+   elements are included in the data stream.  While in virtually all
+   other IPFIX data messages, the collector knows a priori via the
+   template which data will be present in the message, this is not the
+   case with the subtemplate multilist.  The collector need not decode
+   the subtemplate mutlilist, instead skipping over the data element by
+   using the length value of the whole structure.  The issue for
+   collector implementors is to be able to have the data to decide when
+   to do the more expensive operation of decoding the subtemplate
+   multilist or when to skip it.
+
+   In many uses of the subtemplate multilist, a data value may precede
+   the subtemplate multilist giving the collector information about the
+   contents of the structure.  For example, a collector that does
+   protocol feature extraction, (e.g. extracting request strings and
+   return codes from HTTP as well as CODEC and security parameters from
+   SIP) may have a sentinel value indicating the protocol decode (HTTP
+   or SIP) which can be used to differentiate the data inside the
+   subtemplate multilist.  The subtemplate multilist may be used in this
+   case to handle the variability of collecting features that are not
+   always present (e.g. HTTP return codes).
+
+   By gathering the additional registry information, the exporter can
+   provide additional context of sentinel values to structured data
+   elements and provide more complex relationship information than is
+   possible within the IPFIX data messages.
+
+
+
+
+
+Inacio                    Expires May 12, 2014                  [Page 4]
+
+Internet-Draft                 IPFIX-PENIE                 November 2013
+
+
+2.4.  Optional Feature Enablement / Hierarchal Feature Description
+
+   An exporter may have optional licensed export for various features.
+   The exporter may enable certain feature set across various product
+   lines or only when certain libraries are present, for example.
+   Especially in the case of implementation dependencies, it is
+   advantageous of the exporter to be able to express the information
+   element registry information separately from the entire registry of
+   elements.  For example, in some cases, there are many thousands of
+   possible information elements that can be extracted, but limiting
+   updates to protocol families (e.g. tunneling protocols) would
+   significantly reduce the burden on collector implementors.
+
+   In this case, an exporter may send multiple registry pointers to the
+   collector, each one individually versioned.  Using this mechanism is
+   intended to minimize the work on a collector to handle exporter
+   upgrades.
+
+3.  Options Record Format
+
+   The mechanism used to transmit the URI information from the exporter
+   to the collector is an options template with a URI.  The URI contains
+   a pointer which provides well formatted, as specified in section 4,
+   information about the semantic type information and description of
+   the private information elements.  The data record may optionally
+   contain an second alternate URI which may be used if the first URI
+   cannot be contacted.  The first presented URI always has higher
+   precedence than the second URI.
+
+                        1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |      Set ID = 3               |        Length = 14            |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |    Template ID = 257          |        Field Count =          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   | Scope Field Count =           |0| private ent. number     346 |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |    Field Length = 4           |   PEN Registry URI        XXX |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |    Field Length = 65536       |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+   Example PENIE Template Definition
+
+                        1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
+
+Inacio                    Expires May 12, 2014                  [Page 5]
+
+Internet-Draft                 IPFIX-PENIE                 November 2013
+
+
+   |        Set ID = 257         |            Length = 50          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                 Private Enterprise Number                     |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                         Version                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |        Length = 39          |                                 |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                                 +
+   |          "http://tools.netsa.cert.org/yaf_pen.xml"            |
+   +                                                               +
+   |                                                               |
+   +                                                               +
+   |                                                               |
+   +                                                               +
+   |                                                               |
+   +                                                               +
+   |                                                               |
+   +                                                               +
+   |                                                               |
+   +                                                               +
+   |                                                               |
+   +                                                               +
+   |                                                               |
+   +                                                               +
+   |                                                               |
+   +                               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+   Example PENIE Data Record
+
+                        1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |        Set ID = 257         |            Length = 79          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                 Private Enterprise Number                     |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                         Version                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |        Length = 29          |                                 |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                                 +
+   |          "http://10.10.1.5/yaf_pen.xml"                       |
+   +                                                               +
+   |                                                               |
+   +                                                               +
+   |                                                               |
+   +                                                               +
+
+
+
+Inacio                    Expires May 12, 2014                  [Page 6]
+
+Internet-Draft                 IPFIX-PENIE                 November 2013
+
+
+   |                                                               |
+   +                                                               +
+   |                                                               |
+   +                                                               +
+   |                                                               |
+   +                                                               +
+   |                                                               |
+   +                                                               +
+   |                                                               |
+   +                                                               +
+   |                                                               |
+   +                               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                               |     Length = 39               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |         "http://tools.netsa.cert.org/yaf_pen.xml"             |
+   +                                                               +
+   |                                                               |
+   +                                                               +
+   |                                                               |
+   +                                                               +
+   |                                                               |
+   +                                                               +
+   |                                                               |
+   +                                                               +
+   |                                                               |
+   +                                                               +
+   |                                                               |
+   +                                                               +
+   |                                                               |
+   +                                                 +-+-+-+-+-+-+-+
+   |                                                 |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+   Example of a PENIE Data Record with a second alternate URI
+
+   The options record allows for creating a URI reference for a private
+   enterprise number.  It is important to note that more than one URI
+   per a single private enterprise number.  The burden of resolving all
+   declared registries falls onto the collector to be able to decode all
+   information elements received from the exporters.
+
+4.  Registry Design
+
+
+
+
+
+
+
+
+
+Inacio                    Expires May 12, 2014                  [Page 7]
+
+Internet-Draft                 IPFIX-PENIE                 November 2013
+
+
+4.1.  Registry Introduction
+
+   The registry design goals are to capture all the information that
+   IPFIX Type Information [RFC5610] provides about individual elements,
+   but to also present more metadata about both individual elements as
+   well as have the ability to provide more information about a
+   collection of elements.
+
+4.2.  Registry Fields
+
+   The top level of a registry contains the following additional
+   elements:
+
+   o  Registry ID - This is an ID that can be used by the creator of the
+      registry to be able to track the registry as a unique item.
+
+   o  Version - Indicates the release version of the registry.
+
+   o  Name - A common name that can be used to refer to the registry.
+
+   o  Security Type - This is a new entry type that allows the complete
+      set of elements defined in the registry to be contained within a
+      security type class.  By allowing the collector to understand the
+      security type, if present, of the information elements a new class
+      of actions may be taken by a collector implementation.
+
+   o  Policy Type - Similar to the security type, this new entry allows
+      the complete set of elements defined in the registry to be
+      contained within a policy type class.  Again, similar to the
+      security type class, the collector may take new actions based upon
+      understanding the policy type of an information element.
+
+   o  Canonical URI - This is the canonical URI to be able to locate the
+      authoritative version of the registry.
+
+   o  Root EID - This defines the Private Enterprise ID for all elements
+      defined in the registry.
+
+   o  Copyright - Optionally the copyright information for the registry
+
+   o  Contact - Contact information to be able to contact the publisher
+      of the registry.
+
+   o  Directory - (I can't remember, but its a URI).
+
+4.3.  Information Element Fields
+
+
+
+
+
+Inacio                    Expires May 12, 2014                  [Page 8]
+
+Internet-Draft                 IPFIX-PENIE                 November 2013
+
+
+   Each information element within a registry may have the following
+   elements:
+
+   o  ID - The information element ID.
+
+   o  PEN - The private enterprise number.
+
+   o  Data type - The data type of the element, as defined in RFC 5610.
+
+   o  Semantics - The semantic of the element, as defined in RFC 5610.
+
+   o  Units - The units of the element, as defined in RFC 5610.
+
+   o  Description - The human readable (and hopefully understandable)
+      description of the element.
+
+   o  MIME Path - An optional MIME path definition of the element.
+
+   o  Derived Value - A boolean value to indicate that the given element
+      is a derived element and not an observed element.
+
+   o  Algorithm Desc - For elements that are derived and not observed, a
+      description of the algorithm used to produce the derived value.
+
+   Additionally, each information may optionally have some attributes
+   when the information element is used as a discriminator for
+   structured data elements associated with the element as follows:
+
+   o  Discriminator - Information Element reference to the structured
+      data for which this element acts as a discriminator.
+
+   o  SelectValue - The value mapping for the discriminator to indicate
+      the contents of the structured data element.
+
+5.  Example Usage
+
+   This example shows a simple registry which contains a collection of
+   private enterprise Information Elements.  This example is the most
+   simple usage of a registry construction, without any structured data
+   or deprecated private elements.
+
+5.1.  Simple Description of Private Elements
+
+   This example shows a simple registry which contains a collection of
+   private enterprise Information Elements.  This example is the most
+   simple usage of a registry construction, without any structured data
+   or deprecated private elements.
+
+
+
+
+Inacio                    Expires May 12, 2014                  [Page 9]
+
+Internet-Draft                 IPFIX-PENIE                 November 2013
+
+
+   <enterprise-registry>
+       <name>Pervasive Passive Collector Private Elements</name>
+       <copyright>(C) 2013 Pervasive Passive, Inc.</copyright>
+       <contact>blackhole@pervasivepassive.com</contact>
+       <private-enterprise-number>65536</private-enterprise-number>
+       <revisionNum>10</revisionNum>
+       <revisionDate>6-Nov-2013</revisionDate>
+
+       <registry>
+           <id>http://www.pervasivepassive.com/ipfix/registry/PerPassReg.xml</id>
+           <name>Pervasive Passive Private Element Registry</name>
+
+
+
+           <element>
+               <id>1040</id>
+               <name>rcpDupAckCount</name>
+               <description>A count of the number of duplicate ACK's observed on the flow</description>
+               <data-type>unsigned64</data-type>
+               <semantics>totalCounter</semantics>
+
+               <units>none</units>
+               <createDate>2013-11-07Z</createDate>
+           </element>
+           <element>
+               <id>1041</id>
+               <name>tcpSelAckCount</name>
+               <description>TCP Selective Acknowledge Count</description>
+               <data-type>unsigned64</data-type>
+               <semantics>totalCounter</semantics>
+
+               <units>none</units>
+               <createDate>2013-11-06Z</createDate>
+           </element>
+           <element>
+               <id>1042</id>
+               <name>minTcpRwin</name>
+               <description>minimum TCP window size observed for reverse direction</description>
+               <data-type>unsigned32</data-type>
+               <semantics>quantity</semantics>
+
+               <units>octets</units>
+               <createDate>2013-11-05Z</createDate>
+           </element>
+           <element>
+               <id>1043</id>
+               <name>meanTcpRwin</name>
+               <description>The mean TCP window size observed for the reverse direction</description>
+
+
+
+Inacio                    Expires May 12, 2014                 [Page 10]
+
+Internet-Draft                 IPFIX-PENIE                 November 2013
+
+
+               <data-type>unsigned32</data-type>
+               <semantics>quantity</semantics>
+
+               <units>octets</units>
+               <createDate>2013-11-04Z</createDate>
+           </element>
+           <element>
+               <id>1044</id>
+               <name>maxTcpRwin</name>
+               <description>The maximum TCP window size observed for the reverse direction</description>
+               <data-type>unsigned32</data-type>
+               <semantics>quantity</semantics>
+
+               <units>octets</units>
+               <createDate>2013-11-03Z</createDate>
+           </element>
+       </registry>
+   </enterprise-registry>
+
+
+6.  Security Considerations
+
+   There are no security considerations relevant to this document,
+   beyond the security considerations necessary in the IPFIX protocol
+   specification [RFC5101], [RFC7011] and their successors.  All
+   transfers of the registry information may be done over any
+   appropriate protocol, such as HTTPS, including security.
+
+7.  IANA Considerations
+
+   IANA needs to create two registries with expert review:
+
+      Security types
+
+      Policy types
+
+   and create a code point for a new information element.
+
+8.  Acknowledgements
+
+   Thanks to Andrew Feren for thoughts on collector implementation for
+   multi-vendor probes.  Thanks to Benoit Claise for continuing to urge
+   me to finish this draft.  Thank you to Brian Trammell for using the
+   QOF [QOF] information elements in the example private enterprise
+   elements.  Thank you to the Carnegie Mellon University, Software
+   Engineering Institute, CERT/CC (Emily Sarneso and Dan Ruef) for using
+   YAF [YAF] private enterprise elements and structured data used in the
+   examples.
+
+
+
+Inacio                    Expires May 12, 2014                 [Page 11]
+
+Internet-Draft                 IPFIX-PENIE                 November 2013
+
+
+9.  References
+
+9.1.  Normative References
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119, March 1997.
+
+   [RFC5101]  Claise, B., "Specification of the IP Flow Information
+              Export (IPFIX) Protocol for the Exchange of IP Traffic
+              Flow Information", RFC 5101, January 2008.
+
+   [RFC5102]  Quittek, J., Bryant, S., Claise, B., Aitken, P., and J.
+              Meyer, "Information Model for IP Flow Information Export",
+              RFC 5102, January 2008.
+
+   [RFC5610]  Boschi, E., Trammell, B., Mark, L., and T. Zseby,
+              "Exporting Type Information for IP Flow Information Export
+              (IPFIX) Information Elements", RFC 5610, July 2009.
+
+   [RFC6313]  Claise, B., Dhandapani, G., Aitken, P., and S. Yates,
+              "Export of Structured Data in IP Flow Information Export
+              (IPFIX)", RFC 6313, July 2011.
+
+   [RFC7011]  Claise, B., Trammell, B., and P. Aitken, "Specification of
+              the IP Flow Information Export (IPFIX) Protocol for the
+              Exchange of Flow Information", STD 77, RFC 7011, September
+              2013.
+
+9.2.  Informative References
+
+   [RFC2223]  Postel, J. and J. Reynolds, "Instructions to RFC Authors",
+              RFC 2223, October 1997.
+
+   [QOF]      Trammell, B., "QOF", <http://github.com/britram/qof>.
+
+   [YAF]      Sarneso, E., Ruef, D., Inacio, C., and B. Trammell, "YAF",
+              <http://tools.netsa.cert.org/>.
+
+Appendix A.  Registry Schema
+
+   <?xml version="1.0" encoding="UTF-8"?>
+   <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.ietf.org/ipfix/ipfix-private-element-registry/1.0" xmlns:r="http://www.ietf.org/ipfix/ipfix-private-element-registry/1.0">
+     <!--
+       It's unclear what the right way of referencing an info element ought
+       to be.  By PEN/ID pair?  By some XML ID?  Both has problems.  Leave it
+       text for now.
+
+       some alternative (in RelaxNG) definition of info-elem-ref
+
+
+
+Inacio                    Expires May 12, 2014                 [Page 12]
+
+Internet-Draft                 IPFIX-PENIE                 November 2013
+
+
+        -- r-ieID = element r:id { xsd:integer {minInclusive="0" maxInclusive="65535"}}
+        --  info-elem-ref = element r:info-elem-ref {
+        --     element r:id { xsd:integer {minInclusive="0" maxInclusive="65535"}} &
+        --     element r:private-enterprise-number { xsd:integer {minInclusive="0" maxInclusive="4294967295"}}
+        -- }
+
+     -->
+     <xs:element name="data-type">
+       <xs:simpleType>
+         <xs:restriction base="xs:token">
+           <xs:enumeration value="octetArray"/>
+           <xs:enumeration value="unsigned8"/>
+           <xs:enumeration value="unsigned16"/>
+           <xs:enumeration value="unsigned32"/>
+           <xs:enumeration value="unsigned64"/>
+           <xs:enumeration value="signed8"/>
+           <xs:enumeration value="signed16"/>
+           <xs:enumeration value="signed32"/>
+           <xs:enumeration value="signed64"/>
+           <xs:enumeration value="float32"/>
+           <xs:enumeration value="float64"/>
+           <xs:enumeration value="boolean"/>
+           <xs:enumeration value="macAddress"/>
+           <xs:enumeration value="string"/>
+           <xs:enumeration value="dateTimeSeconds"/>
+           <xs:enumeration value="dateTimeMilliseconds"/>
+           <xs:enumeration value="dateTimeMicroseconds"/>
+           <xs:enumeration value="dateTimeNanoseconds"/>
+           <xs:enumeration value="ipv4Address"/>
+           <xs:enumeration value="ipv6Address"/>
+           <xs:enumeration value="basicList"/>
+           <xs:enumeration value="subTemplateList"/>
+           <xs:enumeration value="subTemplateMultiList"/>
+         </xs:restriction>
+       </xs:simpleType>
+     </xs:element>
+     <xs:element name="semantics">
+       <xs:simpleType>
+         <xs:restriction base="xs:token">
+           <xs:enumeration value="default"/>
+           <xs:enumeration value="quantity"/>
+           <xs:enumeration value="totalCounter"/>
+           <xs:enumeration value="deltaCounter"/>
+           <xs:enumeration value="identifier"/>
+           <xs:enumeration value="flags"/>
+           <xs:enumeration value="list"/>
+         </xs:restriction>
+       </xs:simpleType>
+
+
+
+Inacio                    Expires May 12, 2014                 [Page 13]
+
+Internet-Draft                 IPFIX-PENIE                 November 2013
+
+
+     </xs:element>
+     <xs:element name="units">
+       <xs:simpleType>
+         <xs:restriction base="xs:token">
+           <xs:enumeration value="none"/>
+           <xs:enumeration value="bits"/>
+           <xs:enumeration value="octets"/>
+           <xs:enumeration value="packets"/>
+           <xs:enumeration value="flows"/>
+           <xs:enumeration value="seconds"/>
+           <xs:enumeration value="milliseconds"/>
+           <xs:enumeration value="microseconds"/>
+           <xs:enumeration value="nanoseconds"/>
+           <xs:enumeration value="4-octet words"/>
+           <xs:enumeration value="messages"/>
+           <xs:enumeration value="hops"/>
+           <xs:enumeration value="entries"/>
+         </xs:restriction>
+       </xs:simpleType>
+     </xs:element>
+     <!--
+
+       Definition of an Information Element
+
+
+     -->
+     <xs:element name="element">
+       <xs:complexType>
+         <xs:choice minOccurs="0" maxOccurs="unbounded">
+           <xs:element name="id">
+             <xs:simpleType>
+               <xs:restriction base="xs:integer">
+                 <xs:minInclusive value="0"/>
+                 <xs:maxInclusive value="65535"/>
+               </xs:restriction>
+             </xs:simpleType>
+           </xs:element>
+           <xs:element name="private-enterprise-number">
+             <xs:simpleType>
+               <xs:restriction base="xs:integer">
+                 <xs:minInclusive value="0"/>
+                 <xs:maxInclusive value="4294967295"/>
+               </xs:restriction>
+             </xs:simpleType>
+           </xs:element>
+           <xs:element name="name" type="xs:token"/>
+           <xs:element ref="r:description"/>
+           <xs:element ref="r:data-type"/>
+
+
+
+Inacio                    Expires May 12, 2014                 [Page 14]
+
+Internet-Draft                 IPFIX-PENIE                 November 2013
+
+
+           <xs:element ref="r:semantics"/>
+           <xs:element ref="r:units"/>
+           <xs:element ref="r:range-begin"/>
+           <xs:element ref="r:range-end"/>
+           <xs:element ref="r:mime-path"/>
+           <xs:element ref="r:derivedValue"/>
+           <xs:element ref="r:algorithmDesc"/>
+           <xs:element ref="r:createDate"/>
+           <xs:element ref="r:deprecated"/>
+           <xs:element ref="r:retired"/>
+           <xs:element ref="r:standarized"/>
+         </xs:choice>
+         <xs:attribute name="discriminator" form="qualified"/>
+         <xs:attribute name="selectValue" form="qualified"/>
+       </xs:complexType>
+     </xs:element>
+     <xs:element name="description" type="xs:string"/>
+     <xs:element name="range-begin" type="xs:string"/>
+     <xs:element name="range-end" type="xs:string"/>
+     <xs:element name="mime-path" type="xs:string"/>
+     <xs:element name="derivedValue" type="xs:boolean"/>
+     <xs:element name="algorithmDesc" type="xs:string"/>
+     <xs:element name="createDate" type="xs:date"/>
+     <xs:element name="deprecated" type="xs:date"/>
+     <xs:element name="retired" type="xs:date"/>
+     <xs:element name="standarized">
+       <xs:simpleType>
+         <xs:restriction base="xs:integer">
+           <xs:minInclusive value="0"/>
+           <xs:maxInclusive value="65535"/>
+         </xs:restriction>
+       </xs:simpleType>
+     </xs:element>
+     <!--
+
+       Definition of a registry
+
+       This is not the enterprise registry, which there is
+       is only one per file.  This is a smaller structure
+       which is mostly designed to group like elements
+       together - having similar security or policy types
+       for example
+
+       It can contain elements or further sub-registries
+
+     -->
+     <xs:element name="registry">
+       <xs:complexType>
+
+
+
+Inacio                    Expires May 12, 2014                 [Page 15]
+
+Internet-Draft                 IPFIX-PENIE                 November 2013
+
+
+         <xs:choice minOccurs="0" maxOccurs="unbounded">
+           <xs:element name="id" type="xs:anyURI"/>
+           <xs:element name="name" type="xs:string"/>
+           <xs:element ref="r:security-type"/>
+           <xs:element ref="r:policy-type"/>
+           <xs:element ref="r:url"/>
+           <xs:element ref="r:root-eid"/>
+           <xs:choice>
+             <xs:element ref="r:registry"/>
+             <xs:element ref="r:element"/>
+           </xs:choice>
+         </xs:choice>
+       </xs:complexType>
+     </xs:element>
+     <xs:element name="security-type" type="xs:string"/>
+     <xs:element name="policy-type" type="xs:string"/>
+     <xs:element name="url" type="xs:anyURI"/>
+     <xs:element name="root-eid" type="xs:integer"/>
+     <!--
+
+       Definition of an enterprise registry
+
+       It contains metadata about the registry and
+       one or more registries
+
+     -->
+     <xs:element name="enterprise-registry">
+       <xs:complexType>
+         <xs:choice minOccurs="0" maxOccurs="unbounded">
+           <xs:element name="name" type="xs:string"/>
+           <xs:element ref="r:copyright"/>
+           <xs:element ref="r:contact"/>
+           <xs:element name="private-enterprise-number" type="xs:integer"/>
+           <xs:element ref="r:directory"/>
+           <xs:element ref="r:revisionNum"/>
+           <xs:element ref="r:revisionDate"/>
+           <xs:element ref="r:registry"/>
+         </xs:choice>
+       </xs:complexType>
+     </xs:element>
+     <xs:element name="copyright" type="xs:string"/>
+     <xs:element name="contact" type="xs:string"/>
+     <xs:element name="directory" type="xs:anyURI"/>
+     <xs:element name="revisionNum" type="xs:integer"/>
+     <xs:element name="revisionDate" type="xs:date"/>
+   </xs:schema>
+
+
+
+
+
+Inacio                    Expires May 12, 2014                 [Page 16]
+
+Internet-Draft                 IPFIX-PENIE                 November 2013
+
+
+Author's Address
+
+   Christopher Inacio
+   Carnegie Mellon University
+   4500 5th Ave
+   Pittsburgh, PA  15213
+   United States
+
+   Phone: +1 412 268 - 3098
+   Email: inacio@sei.cmu.edu
+   URI:   http://www.sei.cmu.edu
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inacio                    Expires May 12, 2014                 [Page 17]
